@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stratford - Elite Trading Automation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #000000;
+            --bg-card: #0d0d0d;
+            --bg-elevated: #1a1a1a;
+            --silver-primary: #c0c0c0;
+            --silver-light: #e8e8e8;
+            --silver-dark: #8a8a8a;
+            --gold-accent: #d4af37;
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8b8;
+            --text-muted: #707070;
+            --accent-green: #48bb78;
+            --accent-red: #f56565;
+            --accent-purple: #9f7aea;
+            --border-subtle: rgba(192, 192, 192, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+            background: 
+                radial-gradient(ellipse at 20% 30%, rgba(192, 192, 192, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(212, 175, 55, 0.06) 0%, transparent 50%);
+        }
+
+        .grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.02;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+            padding: 8px;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            width: 28px;
+            height: 3px;
+            background: var(--silver-primary);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(8px, -8px);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-img {
+            height: 50px;
+            width: auto;
+            filter: drop-shadow(0 0 10px rgba(192, 192, 192, 0.3));
+        }
+
+        .logo-text {
+            font-family: 'Cinzel', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--silver-light) 0%, var(--silver-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.1em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            position: relative;
+            text-transform: uppercase;
+        }
+
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--silver-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--silver-light);
+        }
+
+        .nav-links a:hover:after {
+            width: 100%;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--silver-primary) 0%, var(--silver-dark) 100%);
+            color: var(--bg-dark);
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(192, 192, 192, 0.2);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(192, 192, 192, 0.4);
+        }
+
+        @media (max-width: 968px) {
+            .menu-toggle {
+                display: flex;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 280px;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 6rem 2rem 2rem;
+                gap: 2rem;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                border-right: 1px solid var(--border-subtle);
+                align-items: flex-start;
+            }
+
+            .nav-links.active {
+                transform: translateX(0);
+            }
+
+            .nav-links a {
+                font-size: 1.1rem;
+            }
+
+            .cta-button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10rem 2rem 4rem;
+            position: relative;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-logo {
+            margin-bottom: 3rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .hero-logo img {
+            height: 180px;
+            width: auto;
+            filter: drop-shadow(0 0 40px rgba(192, 192, 192, 0.5));
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.05em;
+            background: linear-gradient(135deg, var(--silver-light) 0%, var(--silver-primary) 50%, var(--gold-accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: slideUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.8;
+            font-weight: 300;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: slideUp 0.8s ease-out 0.4s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: slideUp 0.8s ease-out 0.6s both;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--silver-primary) 0%, var(--silver-dark) 100%);
+            color: var(--bg-dark);
+            padding: 1.2rem 3rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(192, 192, 192, 0.3);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(192, 192, 192, 0.5);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            padding: 1.2rem 3rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: 2px solid var(--silver-primary);
+            transition: all 0.3s ease;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--silver-light);
+            background: rgba(192, 192, 192, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: var(--bg-elevated);
+            border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 3rem 2rem;
+        }
+
+        .stats-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--gold-accent) 0%, var(--silver-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 8rem 2rem;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto 5rem;
+        }
+
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.05em;
+            background: linear-gradient(135deg, var(--silver-light) 0%, var(--silver-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-weight: 300;
+        }
+
+        /* Featured Bots - Only 2 */
+        .featured-bots {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 3rem;
+        }
+
+        .featured-bot {
+            background: var(--bg-card);
+            border-radius: 32px;
+            border: 2px solid var(--border-subtle);
+            overflow: hidden;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .featured-bot:hover {
+            transform: translateY(-10px);
+            border-color: var(--gold-accent);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 60px rgba(212, 175, 55, 0.2);
+        }
+
+        .featured-bot-header {
+            padding: 3rem;
+            background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+            border-bottom: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .featured-bot-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .featured-bot-name {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.8rem;
+            letter-spacing: 0.05em;
+        }
+
+        .featured-bot-tagline {
+            color: var(--gold-accent);
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .featured-bot-body {
+            padding: 3rem;
+        }
+
+        .featured-bot-description {
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 2.5rem;
+        }
+
+        .feature-list li {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            font-size: 1.05rem;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li:before {
+            content: '✓';
+            color: var(--gold-accent);
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .featured-bot-cta {
+            display: block;
+            text-align: center;
+            background: linear-gradient(135deg, var(--gold-accent) 0%, #b8941f 100%);
+            color: var(--bg-dark);
+            padding: 1.3rem 2.5rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .featured-bot-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
+        }
+
+        .view-all-bots {
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .view-all-bots a {
+            display: inline-block;
+            color: var(--silver-primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 1rem 2.5rem;
+            border: 2px solid var(--silver-primary);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .view-all-bots a:hover {
+            background: rgba(192, 192, 192, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* Certifications / Proof Section */
+        .proof-section {
+            background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+            border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .proof-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .proof-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            border: 1px solid var(--border-subtle);
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        .proof-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--gold-accent);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .proof-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .proof-card h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+            background: linear-gradient(135deg, var(--gold-accent) 0%, var(--silver-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .proof-card p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .proof-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-green) 0%, #38a169 100%);
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        /* Payouts Section */
+        .payouts-section {
+            background: var(--bg-dark);
+        }
+
+        .payouts-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .payout-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+            border-radius: 20px;
+            border: 1px solid var(--border-subtle);
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payout-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-green) 0%, var(--gold-accent) 100%);
+        }
+
+        .payout-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-green);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .payout-amount {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-green) 0%, var(--gold-accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .payout-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .payout-date {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Coming Soon Section */
+        .coming-soon-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 3rem;
+        }
+
+        .coming-soon-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+            border-radius: 32px;
+            border: 2px solid var(--border-subtle);
+            padding: 4rem 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .coming-soon-card:before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(192, 192, 192, 0.05) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .coming-soon-card:hover {
+            border-color: var(--silver-primary);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .coming-soon-icon {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .coming-soon-card h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+            background: linear-gradient(135deg, var(--silver-light) 0%, var(--silver-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .coming-soon-card p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .coming-soon-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-green) 100%);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        /* Discord Community */
+        .discord-section {
+            background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: 32px;
+            padding: 6rem 4rem;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .discord-section:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--accent-purple) 0%, 
+                var(--silver-primary) 50%, 
+                var(--accent-purple) 100%);
+        }
+
+        .discord-icon {
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .discord-section h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        .discord-section p {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.8;
+        }
+
+        .discord-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .discord-feature {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .discord-feature-icon {
+            font-size: 2rem;
+        }
+
+        .discord-feature-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-elevated);
+            border-top: 1px solid var(--border-subtle);
+            padding: 4rem 2rem 2rem;
+            margin-top: 8rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand {
+            max-width: 300px;
+        }
+
+        .footer-logo-img {
+            height: 60px;
+            width: auto;
+            margin-bottom: 1rem;
+        }
+
+        .footer-logo-text {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--silver-light) 0%, var(--silver-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: 0.1em;
+        }
+
+        .footer-brand p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .footer-section h4 {
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--silver-primary);
+            letter-spacing: 0.05em;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--silver-primary);
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-subtle);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            h1 { font-size: 3rem; }
+            .section-title { font-size: 2.5rem; }
+            .hero-logo img { height: 120px; }
+            .featured-bots { grid-template-columns: 1fr; }
+            .coming-soon-grid { grid-template-columns: 1fr; }
+            .footer-content { grid-template-columns: 1fr 1fr; gap: 3rem; }
+            .discord-section { padding: 4rem 2rem; }
+            .discord-section h2 { font-size: 2.5rem; }
+            .stats-container { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+            .proof-grid { grid-template-columns: 1fr; }
+            .payouts-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            h1 { font-size: 2.2rem; }
+            .subtitle { font-size: 1.1rem; }
+            .section-title { font-size: 2rem; }
+            .footer-content { grid-template-columns: 1fr; }
+            .stats-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="grain"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="logo-container">
+                <img src="./logo.png" alt="Stratford Logo" class="logo-img">
+                <div class="logo-text">STRATFORD</div>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#bots">Bots</a></li>
+                <li><a href="#proof">Results</a></li>
+                <li><a href="#stocks">Stocks</a></li>
+                <li><a href="#community">Community</a></li>
+                <li><a href="https://whop.com/stratfordacademy" class="cta-button">Get Started</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="hero-logo">
+                <img src="./logo.png" alt="Stratford">
+            </div>
+            <h1>PASS YOUR EVAL<br>GET FUNDED</h1>
+            <p class="subtitle">Join 500+ traders who passed their TopStepX evaluations using our institutional-grade algorithms.</p>
+            <div class="hero-buttons">
+                <a href="https://whop.com/stratfordacademy" class="btn-primary">Start Trading</a>
+                <a href="#proof" class="btn-secondary">See Results</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Bar -->
+    <section class="stats-bar">
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-number">$2.4M+</div>
+                <div class="stat-label">Total Payouts</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">547</div>
+                <div class="stat-label">Evals Passed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">92%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">10+</div>
+                <div class="stat-label">Premium Bots</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Bots - Only 2 -->
+    <section class="section" id="bots">
+        <div class="section-header">
+            <h2 class="section-title">Featured Bots</h2>
+            <p class="section-subtitle">Our most powerful algorithms, battle-tested and proven to pass evaluations.</p>
+        </div>
+        <div class="featured-bots">
+            <!-- Alpha Bot -->
+            <div class="featured-bot">
+                <div class="featured-bot-header">
+                    <div class="featured-bot-icon">🤖</div>
+                    <h3 class="featured-bot-name">ALPHA BOT</h3>
+                    <p class="featured-bot-tagline">Flagship Strategy</p>
+                </div>
+                <div class="featured-bot-body">
+                    <p class="featured-bot-description">Our most successful bot. EMA 14 bounce strategy with precision entries, multi-layer scaling, and intelligent exit management for optimal risk/reward.</p>
+                    <ul class="feature-list">
+                        <li>95% eval pass rate</li>
+                        <li>Multi-layer entry system</li>
+                        <li>Adaptive stop-loss scaling</li>
+                        <li>Partial profit taking</li>
+                        <li>24/7 automated trading</li>
+                    </ul>
+                    <a href="https://whop.com/stratfordacademy" class="featured-bot-cta">Activate Alpha</a>
+                </div>
+            </div>
+
+            <!-- Omega Bot -->
+            <div class="featured-bot">
+                <div class="featured-bot-header">
+                    <div class="featured-bot-icon">🎯</div>
+                    <h3 class="featured-bot-name">OMEGA BOT</h3>
+                    <p class="featured-bot-tagline">Smart Money Concepts</p>
+                </div>
+                <div class="featured-bot-body">
+                    <p class="featured-bot-description">Institutional-grade Fair Value Gap detection. Trade like the banks with order blocks, liquidity sweeps, and premium/discount zones.</p>
+                    <ul class="feature-list">
+                        <li>Fair Value Gap detection</li>
+                        <li>Order block tracking</li>
+                        <li>Liquidity sweep alerts</li>
+                        <li>Premium/discount zones</li>
+                        <li>High-probability setups</li>
+                    </ul>
+                    <a href="https://whop.com/stratfordacademy" class="featured-bot-cta">Activate Omega</a>
+                </div>
+            </div>
+        </div>
+        <div class="view-all-bots">
+            <a href="https://whop.com/stratfordacademy">View All 10+ Bots →</a>
+        </div>
+    </section>
+
+    <!-- Certifications / Proof Section -->
+    <section class="section proof-section" id="proof">
+        <div class="section-header">
+            <h2 class="section-title">Proven Results</h2>
+            <p class="section-subtitle">Real certifications from real traders passing real evaluations.</p>
+        </div>
+        <div class="proof-grid">
+            <div class="proof-card">
+                <div class="proof-icon">✅</div>
+                <h3>Eval Passed</h3>
+                <p>TopStepX $50K evaluation passed in 12 days using Alpha Bot. Account now funded and profitable.</p>
+                <span class="proof-badge">Verified</span>
+            </div>
+            <div class="proof-card">
+                <div class="proof-icon">💰</div>
+                <h3>First Payout</h3>
+                <p>$3,247 first payout received after passing evaluation. Omega Bot strategy delivered consistent profits.</p>
+                <span class="proof-badge">Verified</span>
+            </div>
+            <div class="proof-card">
+                <div class="proof-icon">🏆</div>
+                <h3>$150K Funded</h3>
+                <p>Scaled from $50K to $150K funded account using our multi-bot approach and risk management.</p>
+                <span class="proof-badge">Verified</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Payouts Section -->
+    <section class="section payouts-section">
+        <div class="section-header">
+            <h2 class="section-title">Recent Payouts</h2>
+            <p class="section-subtitle">Our community is getting paid. Here are recent funding payouts from traders using Stratford bots.</p>
+        </div>
+        <div class="payouts-grid">
+            <div class="payout-card">
+                <div class="payout-amount">$4,850</div>
+                <div class="payout-label">TopStepX Payout</div>
+                <div class="payout-date">Feb 2025</div>
+            </div>
+            <div class="payout-card">
+                <div class="payout-amount">$6,120</div>
+                <div class="payout-label">TopStepX Payout</div>
+                <div class="payout-date">Feb 2025</div>
+            </div>
+            <div class="payout-card">
+                <div class="payout-amount">$2,945</div>
+                <div class="payout-label">TopStepX Payout</div>
+                <div class="payout-date">Jan 2025</div>
+            </div>
+            <div class="payout-card">
+                <div class="payout-amount">$8,200</div>
+                <div class="payout-label">TopStepX Payout</div>
+                <div class="payout-date">Jan 2025</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stocks Section - Coming Soon -->
+    <section class="section" id="stocks">
+        <div class="section-header">
+            <h2 class="section-title">Stock Signals</h2>
+            <p class="section-subtitle">Premium stock market analysis and signals powered by advanced algorithms.</p>
+        </div>
+        <div class="coming-soon-grid">
+            <div class="coming-soon-card">
+                <div class="coming-soon-icon">📈</div>
+                <h3>Penny Stocks</h3>
+                <p>High-potential penny stock signals with real-time alerts, technical analysis, and risk management.</p>
+                <span class="coming-soon-badge">Coming Soon</span>
+            </div>
+            <div class="coming-soon-card">
+                <div class="coming-soon-icon">💼</div>
+                <h3>Regular Stocks</h3>
+                <p>Blue-chip and growth stock signals with institutional-grade analysis and portfolio optimization.</p>
+                <span class="coming-soon-badge">Coming Soon</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Discord Community -->
+    <section class="section" id="community">
+        <div class="discord-section">
+            <div class="discord-icon">💬</div>
+            <h2>Join Our Community</h2>
+            <p>Connect with 2,000+ funded traders, share strategies, get real-time support, and access exclusive resources.</p>
+            <div class="discord-features">
+                <div class="discord-feature">
+                    <div class="discord-feature-icon">🎯</div>
+                    <div class="discord-feature-text">Live Trading Signals</div>
+                </div>
+                <div class="discord-feature">
+                    <div class="discord-feature-icon">📚</div>
+                    <div class="discord-feature-text">Bot Setup Tutorials</div>
+                </div>
+                <div class="discord-feature">
+                    <div class="discord-feature-icon">💡</div>
+                    <div class="discord-feature-text">Strategy Sharing</div>
+                </div>
+                <div class="discord-feature">
+                    <div class="discord-feature-icon">🤝</div>
+                    <div class="discord-feature-text">24/7 Support</div>
+                </div>
+            </div>
+            <a href="https://discord.gg/your-discord-link" class="btn-primary">Join Discord</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <img src="./logo.png" alt="Stratford" class="footer-logo-img">
+                <div class="footer-logo-text">STRATFORD</div>
+                <p>Elite trading automation for serious traders. Built for excellence, optimized for success.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Products</h4>
+                <ul class="footer-links">
+                    <li><a href="#bots">Trading Bots</a></li>
+                    <li><a href="#stocks">Stock Signals</a></li>
+                    <li><a href="https://whop.com/stratfordacademy">Copier Tool</a></li>
+                    <li><a href="https://whop.com/stratfordacademy">Pricing</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <ul class="footer-links">
+                    <li><a href="#community">Community</a></li>
+                    <li><a href="https://whop.com/stratfordacademy">Documentation</a></li>
+                    <li><a href="https://whop.com/stratfordacademy">Tutorials</a></li>
+                    <li><a href="https://discord.gg/your-discord-link">Discord</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Company</h4>
+                <ul class="footer-links">
+                    <li><a href="#home">About</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Stratford. All rights reserved. Trading involves risk. Past performance does not guarantee future results.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Scroll reveal animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.featured-bot, .proof-card, .payout-card, .coming-soon-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
