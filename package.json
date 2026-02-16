@@ -1,0 +1,9 @@
+{
+  "name": "stratford-academy-website",
+  "version": "1.0.0",
+  "description": "Stratford Academy - Elite Trading Automation Website",
+  "scripts": {
+    "dev": "echo 'Open index.html in browser'",
+    "build": "echo 'Static site - no build needed'"
+  }
+}
